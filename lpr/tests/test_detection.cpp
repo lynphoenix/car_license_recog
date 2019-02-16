@@ -76,12 +76,12 @@ int main(int argc, char *argv[])
         cv::Mat image = cv::imread(img_path + imageName.at(i));
         int x = int(float(image.cols) * (1.0 - scalew)) - 1;
         int y = int(float(image.rows) * (1.0 - scaleh)) - 1;
-        double timeStart = (double)getTickCount();
+        double timeStart = (double)cv::getTickCount();
         plateDetection.plateDetectionRough(image,plates,36,700, 
                                            cv::Point(x,y), 
                                            cv::Size2f(scalew, scaleh), 
                                            scale, minNeighbors);
-        double DetectionTime = ((double)getTickCount() - timeStart) / getTickFrequency()*1000;
+        double DetectionTime = ((double)cv::getTickCount() - timeStart) / cv::getTickFrequency()*1000;
         totalRects += plates.size();
         std::cout<<"Total time: "<<DetectionTime<<" Ms"<<std::endl;
         for(pr::PlateInfo platex:plates)
