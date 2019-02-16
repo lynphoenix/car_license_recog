@@ -11,8 +11,15 @@ namespace pr{
         std::vector<cv::Rect> platesRegions;
         cv::Size minSize(min_w,min_w/4);
         cv::Size maxSize(max_w,max_w/4);
+
+        double timeStart = (double)getTickCount();
+
         cascade.detectMultiScale( processImage, platesRegions,
                                   1.1, 3, cv::CASCADE_SCALE_IMAGE,minSize,maxSize);
+
+        double DetectionTime = ((double)getTickCount() - timeStart) / getTickFrequency()*1000;
+        std::cout<<"detectMultiScale time: "<<DetectionTime<<" Ms"<<std::endl;
+
         for(auto plate:platesRegions)
         {
             int zeroadd_w  = static_cast<int>(plate.width*0.30);
