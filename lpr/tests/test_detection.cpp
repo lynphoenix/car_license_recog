@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
         "{cascade_path | | cascade xml of detection model.}"
         "{img_path | | image folder to be detect }"
         "{rst_path | | result folder to save images }"
+        "{img_list | | image list to be detect }"
         ;
     cv::CommandLineParser parser(argc, argv, keys);
     parser.about("Test Detection");
@@ -50,12 +51,22 @@ int main(int argc, char *argv[])
     }
 
     int minNeighbors = parser.get<int>("minNeighbors");
-    std::string cascade_path = parser.get<std::string>("cascade_path");
-    std::string img_path = parser.get<std::string>("img_path");
-    std::string rst_path = parser.get<std::string>("rst_path");
+    const std::string cascade_path = parser.get<std::string>("cascade_path");
+    const std::string img_path = parser.get<std::string>("img_path");
+    const std::string rst_path = parser.get<std::string>("rst_path");
+    const std::string img_list = parser.get<std::string>("img_list");
+
     float scale = parser.get<float>("scale");
     float scalew = parser.get<float>("scalew");
     float scaleh = parser.get<float>("scaleh");
+    std::cout << "scale: " << scale << std::endl;
+    std::cout << "scalew: " << scalew << std::endl;
+    std::cout << "scaleh: " << scaleh << std::endl;
+    std::cout << "minNeighbors: " << minNeighbors << std::endl;
+    std::cout << "cascade_path: " << cascade_path << std::endl;
+    std::cout << "img_path: " << img_path << std::endl;
+    std::cout << "rst_path: " << rst_path << std::endl;
+    std::cout << "img_list: " << img_list << std::endl;
 
     if (!parser.check())
     {
@@ -74,8 +85,8 @@ int main(int argc, char *argv[])
     int totalRects = 0;
     for(int i=0;i<imageName.size();i++){
         cv::Mat image = cv::imread(img_path + imageName.at(i));
-        int x = int(float(image.cols) * (1.0 - scalew)) - 1;
-        int y = int(float(image.rows) * (1.0 - scaleh)) - 1;
+        int x = int(float(image.cols) * (1.0 - scalew));
+        int y = int(float(image.rows) * (1.0 - scaleh));
         double timeStart = (double)cv::getTickCount();
         plateDetection.plateDetectionRough(image,plates,36,700, 
                                            cv::Point(x,y), 

@@ -18,6 +18,7 @@ namespace pr{
 
         int h_sz = int(float(InputImage.rows) * scalesize.height);
         int w_sz = int(float(InputImage.cols) * scalesize.width);
+        std::cout << "Point: <" << startPoint.x << ", " << startPoint.y << ">; Size: <" << h_sz << ", " << w_sz << ">." << std::endl;
         cv::Mat InputImage2 = InputImage(cv::Rect(startPoint.x, startPoint.y, w_sz, h_sz));
 
         cv::cvtColor(InputImage2,processImage,cv::COLOR_BGR2GRAY);
