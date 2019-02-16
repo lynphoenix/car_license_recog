@@ -10,7 +10,10 @@ namespace pr{
     };
     void PlateDetection::plateDetectionRough(cv::Mat InputImage,std::vector<pr::PlateInfo>  &plateInfos,int min_w,int max_w){
         cv::Mat processImage;
-        cv::cvtColor(InputImage,processImage,cv::COLOR_BGR2GRAY);
+        int h = InputImage.rows / 2;
+        cv::Mat InputImage2 = InputImage(cv::Rect(0, h-1, InputImage.cols, h));
+
+        cv::cvtColor(InputImage2,processImage,cv::COLOR_BGR2GRAY);
         std::vector<cv::Rect> platesRegions;
         cv::Size minSize(min_w,min_w/4);
         cv::Size maxSize(max_w,max_w/4);
@@ -33,7 +36,7 @@ namespace pr{
             plate.y-=zeroadd_y;
             plate.height += zeroadd_h;
             plate.width += zeroadd_w;
-                cv::Mat plateImage = util::cropFromImage(InputImage,plate);
+                cv::Mat plateImage = util::cropFromImage(InputImage2,plate);
             PlateInfo plateInfo(plateImage,plate);
             plateInfos.push_back(plateInfo);
 
