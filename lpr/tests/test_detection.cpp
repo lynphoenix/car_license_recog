@@ -13,7 +13,7 @@ void drawRect(cv::Mat image,cv::Rect rect)
 }
 
 
-bool getImageName(const char *fileName, vector<string> &imageName)
+bool getImageName(const char *fileName, std::vector<std::string> &imageName)
 {
     FILE *f = fopen(fileName, "r");
     if (f == NULL)
@@ -23,7 +23,7 @@ bool getImageName(const char *fileName, vector<string> &imageName)
     {
         //去掉换行符
         buffer[strlen(buffer) - 1] = '\0';
-        imageName.push_back(string(buffer));
+        imageName.push_back(std::string(buffer));
     }
     fclose(f);
     return true;
@@ -33,14 +33,14 @@ bool getImageName(const char *fileName, vector<string> &imageName)
 int main(int argc, char *argv[])
 {
     const String keys =
-        "{help h usage ? |      | print this message   }"
-        "{@image1        |      | image1 for compare   }"
-        "{@image2        |      | image2 for compare   }"
-        "{@repeat        |1     | number               }"
-        "{path           |.     | path to file         }"
-        "{fps            | -1.0 | fps for output video }"
-        "{N count        |100   | count of objects     }"
-        "{ts timestamp   |      | use time stamp       }"
+        "{help h|      | need help }"
+        "{minNeighbors | 3 | minNeighbors }"
+        "{scale | 1.1     | scale factor of detection }"
+        "{scalew | 1.0 | detection scale in width range }"
+        "{scaleh | 1.0 | detection scale in height range }"
+        "{cascade_path | | cascade xml of detection model.}"
+        "{img_path | | image folder to be detect }"
+        "{rst_path | | result folder to save images }"
         ;
     cv::CommandLineParser parser(argc, argv, keys);
     parser.about("Test Detection");
