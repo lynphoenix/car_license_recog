@@ -32,7 +32,7 @@ bool getImageName(const char *fileName, std::vector<std::string> &imageName)
 
 int main(int argc, char *argv[])
 {
-    const String keys =
+    const std::string keys =
         "{help h|      | need help }"
         "{minNeighbors | 3 | minNeighbors }"
         "{scale | 1.1     | scale factor of detection }"
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    std::vector<string> imageName;
+    std::vector<std::string> imageName;
     if (!getImageName("/disk1/huajianni/temp/HyperLPR-master/Prj-Linux/lpr/img.txt", imageName))
     {
         std::cerr << "Can't open image_list.list file" << std::endl;
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     std::vector<pr::PlateInfo> plates;
     int totalRects = 0;
     for(int i=0;i<imageName.size();i++){
-        cv::Mat image = cv::imread(imgdir + imageName.at(i));
+        cv::Mat image = cv::imread(img_path + imageName.at(i));
         int x = int(float(image.cols) * (1.0 - scalew)) - 1;
         int y = int(float(image.rows) * (1.0 - scaleh)) - 1;
         double timeStart = (double)getTickCount();
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
         for(pr::PlateInfo platex:plates)
         {
             drawRect(image,platex.getPlateRect());
-            cv::imwrite(resultdir+imageName.at(i),platex.getPlateImage());
+            cv::imwrite(rst_path+imageName.at(i),platex.getPlateImage());
         }
 
     }
