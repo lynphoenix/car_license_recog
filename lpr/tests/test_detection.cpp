@@ -13,21 +13,86 @@ void drawRect(cv::Mat image,cv::Rect rect)
 }
 
 
-int main()
+bool getImageName(const char *fileName, vector<string> &imageName)
 {
-    cv::Mat image = cv::imread("res/test1.jpg");
-    pr::PlateDetection plateDetection("model/cascade.xml");
-    std::vector<pr::PlateInfo> plates;
-    plateDetection.plateDetectionRough(image,plates);
-    for(pr::PlateInfo platex:plates)
+    FILE *f = fopen(fileName, "r");
+    if (f == NULL)
+        return false;
+    char buffer[300];
+    while (fgets(buffer, 300, f))
     {
-        drawRect(image,platex.getPlateRect());
-        cv::imwrite("res/cache/test.png",platex.getPlateImage());
-        cv::imshow("image",platex.getPlateImage());
-        cv::waitKey(0);
+        //去掉换行符
+        buffer[strlen(buffer) - 1] = '\0';
+        imageName.push_back(string(buffer));
     }
-    cv::imshow("image",image);
-    cv::waitKey(0);
+    fclose(f);
+    return true;
+}
+
+
+int main(int argc, char *argv[])
+{
+    const String keys =
+        "{help h usage ? |      | print this message   }"
+        "{@image1        |      | image1 for compare   }"
+        "{@image2        |      | image2 for compare   }"
+        "{@repeat        |1     | number               }"
+        "{path           |.     | path to file         }"
+        "{fps            | -1.0 | fps for output video }"
+        "{N count        |100   | count of objects     }"
+        "{ts timestamp   |      | use time stamp       }"
+        ;
+    cv::CommandLineParser parser(argc, argv, keys);
+    parser.about("Test Detection");
+    if (parser.has("help")){
+        parser.printMessage();
+        return 0;
+    }
+
+    int minNeighbors = parser.get<int>("minNeighbors");
+    std::string cascade_path = parser.get<std::string>("cascade_path");
+    std::string img_path = parser.get<std::string>("img_path");
+    std::string rst_path = parser.get<std::string>("rst_path");
+    float scale = parser.get<float>("scale");
+    float scalew = parser.get<float>("scalew");
+    float scaleh = parser.get<float>("scaleh");
+
+    if (!parser.check())
+    {
+        parser.printErrors();
+        return 0;
+    }
+
+    std::vector<string> imageName;
+    if (!getImageName("/disk1/huajianni/temp/HyperLPR-master/Prj-Linux/lpr/img.txt", imageName))
+    {
+        std::cerr << "Can't open image_list.list file" << std::endl;
+    }
+
+    pr::PlateDetection plateDetection(cascade_path);
+    std::vector<pr::PlateInfo> plates;
+    int totalRects = 0;
+    for(int i=0;i<imageName.size();i++){
+        cv::Mat image = cv::imread(imgdir + imageName.at(i));
+        int x = int(float(image.cols) * (1.0 - scalew)) - 1;
+        int y = int(float(image.rows) * (1.0 - scaleh)) - 1;
+        double timeStart = (double)getTickCount();
+        plateDetection.plateDetectionRough(image,plates,36,700, 
+                                           cv::Point(x,y), 
+                                           cv::Size2f(scalew, scaleh), 
+                                           scale, minNeighbors);
+        double DetectionTime = ((double)getTickCount() - timeStart) / getTickFrequency()*1000;
+        totalRects += plates.size();
+        std::cout<<"Total time: "<<DetectionTime<<" Ms"<<std::endl;
+        for(pr::PlateInfo platex:plates)
+        {
+            drawRect(image,platex.getPlateRect());
+            cv::imwrite(resultdir+imageName.at(i),platex.getPlateImage());
+        }
+
+    }
+    std::cout<<"Total Plates: "<<totalRects<<". Counts."<<std::endl;
+
     return 0 ;
 
 

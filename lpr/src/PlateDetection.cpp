@@ -8,10 +8,17 @@ namespace pr{
         cascade.load(filename_cascade);
 
     };
-    void PlateDetection::plateDetectionRough(cv::Mat InputImage,std::vector<pr::PlateInfo>  &plateInfos,int min_w,int max_w){
+    void PlateDetection::plateDetectionRough(cv::Mat InputImage,
+                                 std::vector<pr::PlateInfo> &plateInfos,
+                                 int min_w,int max_w,
+                                 cv::Point startPoint=cv::Point(0,0), cv::Size2f scalesize=cv::Size2f(1.0,1.0),
+                                 float scale, int minNeighbors
+                                 ){
         cv::Mat processImage;
-        int h = InputImage.rows / 2;
-        cv::Mat InputImage2 = InputImage(cv::Rect(0, h-1, InputImage.cols, h));
+
+        int h_sz = int(float(InputImage.rows) * scalesize.height);
+        int w_sz = int(float(InputImage.cols) * scalesize.width);
+        cv::Mat InputImage2 = InputImage(cv::Rect(startPoint.x, startPoint.y, w_sz, h_sz));
 
         cv::cvtColor(InputImage2,processImage,cv::COLOR_BGR2GRAY);
         std::vector<cv::Rect> platesRegions;
@@ -21,7 +28,7 @@ namespace pr{
         double timeStart = (double)cv::getTickCount();
 
         cascade.detectMultiScale( processImage, platesRegions,
-                                  1.1, 3, cv::CASCADE_SCALE_IMAGE,minSize,maxSize);
+                                  scale, minNeighbors, cv::CASCADE_SCALE_IMAGE,minSize,maxSize);
 
         double DetectionTime = ((double)cv::getTickCount() - timeStart) / cv::getTickFrequency()*1000;
         std::cout<<"detectMultiScale time: "<<DetectionTime<<" Ms"<<std::endl;
