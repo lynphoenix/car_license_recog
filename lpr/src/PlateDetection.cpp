@@ -1,5 +1,8 @@
 #include "../include/PlateDetection.h"
 #include "util.h"
+
+#include <opencv2/opencv.hpp>
+
 namespace pr{
     PlateDetection::PlateDetection(std::string filename_cascade){
         cascade.load(filename_cascade);
@@ -12,12 +15,12 @@ namespace pr{
         cv::Size minSize(min_w,min_w/4);
         cv::Size maxSize(max_w,max_w/4);
 
-        double timeStart = (double)getTickCount();
+        double timeStart = (double)cv2::getTickCount();
 
         cascade.detectMultiScale( processImage, platesRegions,
                                   1.1, 3, cv::CASCADE_SCALE_IMAGE,minSize,maxSize);
 
-        double DetectionTime = ((double)getTickCount() - timeStart) / getTickFrequency()*1000;
+        double DetectionTime = ((double)cv2::getTickCount() - timeStart) / cv2::getTickFrequency()*1000;
         std::cout<<"detectMultiScale time: "<<DetectionTime<<" Ms"<<std::endl;
 
         for(auto plate:platesRegions)
