@@ -11,7 +11,7 @@ namespace pr{
     void PlateDetection::plateDetectionRough(cv::Mat InputImage,
                                  std::vector<pr::PlateInfo> &plateInfos,
                                  int min_w,int max_w,
-                                 cv::Point startPoint=cv::Point(0,0), cv::Size2f scalesize=cv::Size2f(1.0,1.0),
+                                 cv::Point startPoint, cv::Size2f scalesize,
                                  float scale, int minNeighbors
                                  ){
         cv::Mat processImage;
