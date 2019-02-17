@@ -120,7 +120,80 @@ bool getImageName(const char *fileName, vector<string> &imageName)
 }
 
 
+void TEST_ARGS_PIPELINE(int argc, char *argv[]){
+    const std::string keys =
+        "{help h|      | need help }"
+        "{minNeighbors | 3 | minNeighbors }"
+        "{scale | 1.1     | scale factor of detection }"
+        "{scalew | 1.0 | detection scale in width range }"
+        "{scaleh | 1.0 | detection scale in height range }"
+        "{cascade_path | | cascade xml of detection model.}"
+        "{img_path | | image folder to be detect }"
+        "{rst_path | | result folder to save images }"
+        "{img_list | | image list to be detect }"
+        ;
+    cv::CommandLineParser parser(argc, argv, keys);
+    parser.about("Test Pipeline");
+    if (parser.has("help")){
+        parser.printMessage();
+        return 0;
+    }
 
+    int minNeighbors = parser.get<int>("minNeighbors");
+    std::string cascade_path = parser.get<std::string>("cascade_path");
+    std::string img_path = parser.get<std::string>("img_path");
+    std::string rst_path = parser.get<std::string>("rst_path");
+    std::string img_list = parser.get<std::string>("img_list");
+
+    float scale = parser.get<float>("scale");
+    float scalew = parser.get<float>("scalew");
+    float scaleh = parser.get<float>("scaleh");
+
+    std::cout << "scale: " << scale << std::endl;
+    std::cout << "scalew: " << scalew << std::endl;
+    std::cout << "scaleh: " << scaleh << std::endl;
+    std::cout << "minNeighbors: " << minNeighbors << std::endl;
+    std::cout << "cascade_path: " << cascade_path << std::endl;
+    std::cout << "img_path: " << img_path.c_str() << std::endl;
+    std::cout << "rst_path: " << rst_path.c_str() << std::endl;
+    std::cout << "img_list: " << img_list.c_str() << std::endl;
+
+    pr::PipelinePR prc(cascade_path, 
+                       "/disk1/huajianni/temp/HyperLPR-master/Prj-Linux/lpr/model/HorizonalFinemapping.prototxt","/disk1/huajianni/temp/HyperLPR-master/Prj-Linux/lpr/model/HorizonalFinemapping.caffemodel",
+                       "/disk1/huajianni/temp/HyperLPR-master/Prj-Linux/lpr/model/Segmentation.prototxt","/disk1/huajianni/temp/HyperLPR-master/Prj-Linux/lpr/model/Segmentation.caffemodel",
+                       "/disk1/huajianni/temp/HyperLPR-master/Prj-Linux/lpr/model/CharacterRecognization.prototxt","/disk1/huajianni/temp/HyperLPR-master/Prj-Linux/lpr/model/CharacterRecognization.caffemodel",
+                       "/disk1/huajianni/temp/HyperLPR-master/Prj-Linux/lpr/model/SegmenationFree-Inception.prototxt","/disk1/huajianni/temp/HyperLPR-master/Prj-Linux/lpr/model/SegmenationFree-Inception.caffemodel"
+    );
+
+    int font_face = cv::FONT_HERSHEY_PLAIN; 
+    double font_scale = 1;
+    int thickness = 1;
+    int baseline;
+    std::vector<std::string> imageName;
+
+    if (!getImageName(img_list, imageName)){
+        std::cerr << "Can't open image_list.list file" << std::endl;
+    }
+    
+    for(int i=0;i<imageName.size();i++){
+        cv::Mat image = cv::imread(img_path + imageName.at(i));
+        double timeStart = (double)cv::getTickCount();
+        std::vector<pr::PlateInfo> res = prc.RunPiplineAsImage(image,pr::SEGMENTATION_FREE_METHOD);
+        double DetectionTime = ((double)cv::getTickCount() - timeStart) / cv::getTickFrequency()*1000;
+        std::cout<<"Total time: "<<DetectionTime<<" Ms"<<std::endl;
+        for(auto st:res) {
+            if(st.confidence>0.4) {
+                std::cout << st.getPlateName() << " " << st.confidence << std::endl;
+                cv::Rect region = st.getPlateRect();
+
+                cv::rectangle(image,cv::Point(region.x,region.y),cv::Point(region.x+region.width,region.y+region.height),cv::Scalar(255,255,0),2);
+                cv::putText(image, st.getPlateName(), cv::Point(region.x,region.y), font_face, font_scale, cv::Scalar(0, 255, 255), thickness, 8, 0);
+
+            }
+        }
+        cv::imwrite(rst_path+imageName.at(i),image);
+    }
+}
 void TEST_PIPELINE(){
 
 pr::PipelinePR prc("/disk1/huajianni/temp/HyperLPR-master/Prj-Linux/lpr/model/cascade.xml",
@@ -218,12 +291,13 @@ void TEST_CAM()
 }
 
 
-int main()
+int main(int argc, char *argv[])
 {
-//    TEST_ACC();
+//  TEST_ACC();
+//  TEST_CAM();
+//  TEST_PIPELINE();
 
-//    TEST_CAM();
-    TEST_PIPELINE();
+    TEST_ARGS_PIPELINE(argc, argv);
 
     return 0 ;
 
