@@ -3,7 +3,8 @@
 //
 
 #include <../include/PlateDetection.h>
-
+#include<iostream>
+#include<string.h>
 
 void drawRect(cv::Mat image,cv::Rect rect)
 {
@@ -51,22 +52,23 @@ int main(int argc, char *argv[])
     }
 
     int minNeighbors = parser.get<int>("minNeighbors");
-    const std::string cascade_path = parser.get<std::string>("cascade_path");
-    const std::string img_path = parser.get<std::string>("img_path");
-    const std::string rst_path = parser.get<std::string>("rst_path");
-    const std::string img_list = parser.get<std::string>("img_list");
+    std::string cascade_path = parser.get<std::string>("cascade_path");
+    std::string img_path = parser.get<std::string>("img_path");
+    std::string rst_path = parser.get<std::string>("rst_path");
+    std::string img_list = parser.get<std::string>("img_list");
 
     float scale = parser.get<float>("scale");
     float scalew = parser.get<float>("scalew");
     float scaleh = parser.get<float>("scaleh");
+
     std::cout << "scale: " << scale << std::endl;
     std::cout << "scalew: " << scalew << std::endl;
     std::cout << "scaleh: " << scaleh << std::endl;
     std::cout << "minNeighbors: " << minNeighbors << std::endl;
     std::cout << "cascade_path: " << cascade_path << std::endl;
-    std::cout << "img_path: " << img_path << std::endl;
-    std::cout << "rst_path: " << rst_path << std::endl;
-    std::cout << "img_list: " << img_list << std::endl;
+    std::cout << "img_path: " << img_path.c_str() << std::endl;
+    std::cout << "rst_path: " << rst_path.c_str() << std::endl;
+    std::cout << "img_list: " << img_list.c_str() << std::endl;
 
     if (!parser.check())
     {
@@ -83,6 +85,7 @@ int main(int argc, char *argv[])
     pr::PlateDetection plateDetection(cascade_path);
     std::vector<pr::PlateInfo> plates;
     int totalRects = 0;
+    float totalTime = 0.f;
     for(int i=0;i<imageName.size();i++){
         cv::Mat image = cv::imread(img_path + imageName.at(i));
         int x = int(float(image.cols) * (1.0 - scalew));
@@ -94,6 +97,7 @@ int main(int argc, char *argv[])
                                            scale, minNeighbors);
         double DetectionTime = ((double)cv::getTickCount() - timeStart) / cv::getTickFrequency()*1000;
         totalRects += plates.size();
+        totalTime += DetectionTime;
         std::cout<<"Total time: "<<DetectionTime<<" Ms"<<std::endl;
         for(pr::PlateInfo platex:plates)
         {
@@ -103,6 +107,7 @@ int main(int argc, char *argv[])
 
     }
     std::cout<<"Total Plates: "<<totalRects<<". Counts."<<std::endl;
+    std::cout<<"Total Detection Time: "<<totalTime<<" ms."<<std::endl;
 
     return 0 ;
 
