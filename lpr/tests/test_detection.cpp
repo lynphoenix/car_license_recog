@@ -83,10 +83,10 @@ int main(int argc, char *argv[])
     }
 
     pr::PlateDetection plateDetection(cascade_path);
-    std::vector<pr::PlateInfo> plates;
     int totalRects = 0;
     float totalTime = 0.f;
     for(int i=0;i<imageName.size();i++){
+        std::vector<pr::PlateInfo> plates;
         cv::Mat image = cv::imread(img_path + imageName.at(i));
         int x = int(float(image.cols) * (1.0 - scalew));
         int y = int(float(image.rows) * (1.0 - scaleh));

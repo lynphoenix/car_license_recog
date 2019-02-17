@@ -177,10 +177,7 @@ void TEST_ARGS_PIPELINE(int argc, char *argv[]){
     
     for(int i=0;i<imageName.size();i++){
         cv::Mat image = cv::imread(img_path + imageName.at(i));
-        double timeStart = (double)cv::getTickCount();
         std::vector<pr::PlateInfo> res = prc.RunPiplineAsImage(image,pr::SEGMENTATION_FREE_METHOD);
-        double DetectionTime = ((double)cv::getTickCount() - timeStart) / cv::getTickFrequency()*1000;
-        std::cout<<"Total time: "<<DetectionTime<<" Ms"<<std::endl;
         for(auto st:res) {
             if(st.confidence>0.4) {
                 std::cout << st.getPlateName() << " " << st.confidence << std::endl;
