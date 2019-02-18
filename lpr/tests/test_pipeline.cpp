@@ -136,7 +136,7 @@ void TEST_ARGS_PIPELINE(int argc, char *argv[]){
     parser.about("Test Pipeline");
     if (parser.has("help")){
         parser.printMessage();
-        return 0;
+        return;
     }
 
     int minNeighbors = parser.get<int>("minNeighbors");
@@ -171,7 +171,7 @@ void TEST_ARGS_PIPELINE(int argc, char *argv[]){
     int baseline;
     std::vector<std::string> imageName;
 
-    if (!getImageName(img_list, imageName)){
+    if (!getImageName(img_list.c_str(), imageName)){
         std::cerr << "Can't open image_list.list file" << std::endl;
     }
     
