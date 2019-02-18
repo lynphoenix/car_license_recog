@@ -3,7 +3,8 @@
 //
 
 #include "../include/Pipeline.h"
-
+#include<io.h>
+#include<direct.h>
 #include <opencv2/opencv.hpp>
 using namespace cv;
 using namespace std;
@@ -124,6 +125,7 @@ void TEST_ARGS_PIPELINE(int argc, char *argv[]){
     const std::string keys =
         "{help h|      | need help }"
         "{minNeighbors | 3 | minNeighbors }"
+        "{recog_conf | 0.4     | recongnition threshold }"
         "{scale | 1.1     | scale factor of detection }"
         "{scalew | 1.0 | detection scale in width range }"
         "{scaleh | 1.0 | detection scale in height range }"
@@ -141,10 +143,11 @@ void TEST_ARGS_PIPELINE(int argc, char *argv[]){
 
     int minNeighbors = parser.get<int>("minNeighbors");
     std::string cascade_path = parser.get<std::string>("cascade_path");
+    std::string img_list = parser.get<std::string>("img_list");
     std::string img_path = parser.get<std::string>("img_path");
     std::string rst_path = parser.get<std::string>("rst_path");
-    std::string img_list = parser.get<std::string>("img_list");
 
+    float recog_conf = parser.get<float>("recog_conf");
     float scale = parser.get<float>("scale");
     float scalew = parser.get<float>("scalew");
     float scaleh = parser.get<float>("scaleh");
@@ -155,8 +158,36 @@ void TEST_ARGS_PIPELINE(int argc, char *argv[]){
     std::cout << "minNeighbors: " << minNeighbors << std::endl;
     std::cout << "cascade_path: " << cascade_path << std::endl;
     std::cout << "img_path: " << img_path.c_str() << std::endl;
-    std::cout << "rst_path: " << rst_path.c_str() << std::endl;
     std::cout << "img_list: " << img_list.c_str() << std::endl;
+    std::cout << "rst_path: " << rst_path.c_str() << std::endl;
+
+
+    if(_access(rst_path.c_str(), 0)==-1){
+        if(_mkdir(rst_path.c_str()) == -1){
+            std::cerr << "Can't create folder" << std::endl;
+        }
+    }
+    // det results
+    std::string rst_det_path = rst_path + "det/";
+    if(_access(rst_det_path.c_str(), 0)==-1){
+        if(_mkdir(rst_det_path.c_str()) == -1){
+            std::cerr << "Can't create folder" << std::endl;
+        }
+    }
+    // segment results
+    std::string rst_seg_path = rst_path + "seg/";
+    if(_access(rst_seg_path.c_str(), 0)==-1){
+        if(_mkdir(rst_seg_path.c_str()) == -1){
+            std::cerr << "Can't create folder" << std::endl;
+        }
+    }
+    // recognition results
+    std::string rst_rcg_path = rst_path + "rcg/";
+    if(_access(rst_rcg_path.c_str(), 0)==-1){
+        if(_mkdir(rst_rcg_path.c_str()) == -1){
+            std::cerr << "Can't create folder" << std::endl;
+        }
+    }
 
     pr::PipelinePR prc(cascade_path, 
                        "/disk1/huajianni/temp/HyperLPR-master/Prj-Linux/lpr/model/HorizonalFinemapping.prototxt","/disk1/huajianni/temp/HyperLPR-master/Prj-Linux/lpr/model/HorizonalFinemapping.caffemodel",
@@ -179,7 +210,7 @@ void TEST_ARGS_PIPELINE(int argc, char *argv[]){
         cv::Mat image = cv::imread(img_path + imageName.at(i));
         std::vector<pr::PlateInfo> res = prc.RunPiplineAsImage(image,pr::SEGMENTATION_FREE_METHOD);
         for(auto st:res) {
-            if(st.confidence>0.4) {
+            if(st.confidence>recog_conf) {
                 std::cout << st.getPlateName() << " " << st.confidence << std::endl;
                 cv::Rect region = st.getPlateRect();
 
@@ -188,7 +219,7 @@ void TEST_ARGS_PIPELINE(int argc, char *argv[]){
 
             }
         }
-        cv::imwrite(rst_path+imageName.at(i),image);
+        cv::imwrite(rst_rcg_path+imageName.at(i),image);
     }
 }
 void TEST_PIPELINE(){
