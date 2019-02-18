@@ -3,8 +3,9 @@
 //
 
 #include "../include/Pipeline.h"
-#include<io.h>
-#include<direct.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include <opencv2/opencv.hpp>
 using namespace cv;
 using namespace std;
@@ -162,29 +163,29 @@ void TEST_ARGS_PIPELINE(int argc, char *argv[]){
     std::cout << "rst_path: " << rst_path.c_str() << std::endl;
 
 
-    if(_access(rst_path.c_str(), 0)==-1){
-        if(_mkdir(rst_path.c_str()) == -1){
+    if(access(rst_path.c_str(), 0)==-1){
+        if(mkdir(rst_path.c_str(), 0777) == -1){
             std::cerr << "Can't create folder" << std::endl;
         }
     }
     // det results
     std::string rst_det_path = rst_path + "det/";
-    if(_access(rst_det_path.c_str(), 0)==-1){
-        if(_mkdir(rst_det_path.c_str()) == -1){
+    if(access(rst_det_path.c_str(), 0)==-1){
+        if(mkdir(rst_det_path.c_str(), 0777) == -1){
             std::cerr << "Can't create folder" << std::endl;
         }
     }
     // segment results
     std::string rst_seg_path = rst_path + "seg/";
-    if(_access(rst_seg_path.c_str(), 0)==-1){
-        if(_mkdir(rst_seg_path.c_str()) == -1){
+    if(access(rst_seg_path.c_str(), 0)==-1){
+        if(mkdir(rst_seg_path.c_str(), 0777) == -1){
             std::cerr << "Can't create folder" << std::endl;
         }
     }
     // recognition results
     std::string rst_rcg_path = rst_path + "rcg/";
-    if(_access(rst_rcg_path.c_str(), 0)==-1){
-        if(_mkdir(rst_rcg_path.c_str()) == -1){
+    if(access(rst_rcg_path.c_str(), 0)==-1){
+        if(mkdir(rst_rcg_path.c_str(), 0777) == -1){
             std::cerr << "Can't create folder" << std::endl;
         }
     }

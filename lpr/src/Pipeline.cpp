@@ -39,7 +39,11 @@ namespace pr {
         std::vector<PlateInfo> results;
         std::vector<pr::PlateInfo> plates;
         double timeStart = (double)getTickCount();
-        plateDetection->plateDetectionRough(plateImage,plates,36,700);
+        plateDetection->plateDetectionRough(plateImage,plates,36,700,
+                                            cv::Point(x,y), 
+                                            cv::Size2f(scalew, scaleh), 
+                                            scale, minNeighbors);
+
         double DetectionTime = ((double)getTickCount() - timeStart) / getTickFrequency()*1000;
         std::cout<<"Detection time: "<<DetectionTime<<" Ms"<<std::endl;
         
