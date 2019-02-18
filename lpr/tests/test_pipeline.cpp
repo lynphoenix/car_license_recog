@@ -55,7 +55,16 @@ void TEST_ACC(){
 //		cv::imshow("image", image);
 //		cv::waitKey(0);
 
-        std::vector<pr::PlateInfo> res = prc.RunPiplineAsImage(image,pr::SEGMENTATION_FREE_METHOD);
+        int totalRects = 0;
+        int totalLicences = 0;
+        float totalDetTime = 0.f;
+        float totalRcgTime = 0.f;
+
+        std::vector<pr::PlateInfo> res = prc.RunPiplineAsImage(image,pr::SEGMENTATION_FREE_METHOD,
+                                                          1.0, 1.0, 1.1, 3, 0.4, "", "", "",
+                                                          imagename, 
+                                                          &totalRects, &totalLicences,
+                                                          &totalDetTime, &totalRcgTime);
 
         float conf = 0;
         vector<float> con ;
@@ -206,11 +215,17 @@ void TEST_ARGS_PIPELINE(int argc, char *argv[]){
     if (!getImageName(img_list.c_str(), imageName)){
         std::cerr << "Can't open image_list.list file" << std::endl;
     }
-    
+    int totalRects = 0;
+    int totalLicences = 0;
+    float totalDetTime = 0.f;
+    float totalRcgTime = 0.f;
     for(int i=0;i<imageName.size();i++){
         cv::Mat image = cv::imread(img_path + imageName.at(i));
-        std::vector<pr::PlateInfo> res = prc.RunPiplineAsImage(image,pr::SEGMENTATION_FREE_METHOD);
-        for(auto st:res) {
+        std::vector<pr::PlateInfo> res = prc.RunPiplineAsImage(image,pr::SEGMENTATION_FREE_METHOD, 
+                                                               scalew, scaleh, scale, minNeighbors, recog_conf, 
+                                                               rst_det_path, rst_seg_path, rst_rcg_path,
+                                                               imageName.at(i), &totalRects, &totalLicences, &totalDetTime, &totalRcgTime);
+/*         for(auto st:res) {
             if(st.confidence>recog_conf) {
                 std::cout << st.getPlateName() << " " << st.confidence << std::endl;
                 cv::Rect region = st.getPlateRect();
@@ -221,7 +236,12 @@ void TEST_ARGS_PIPELINE(int argc, char *argv[]){
             }
         }
         cv::imwrite(rst_rcg_path+imageName.at(i),image);
+ */    
     }
+
+    std::cout << "Total Detect Time: " << totalDetTime << " ms, with " << totalRects << " plates Got!\t";
+    std::cout << "Total Recognition Time: " << totalRcgTime << " ms, with " << totalLicences << " Licenses Got!" << std::endl;
+
 }
 void TEST_PIPELINE(){
 
@@ -246,7 +266,17 @@ pr::PipelinePR prc("/disk1/huajianni/temp/HyperLPR-master/Prj-Linux/lpr/model/ca
     {
     cv::Mat image = cv::imread(imgdir + imageName.at(i));
     double timeStart = (double)getTickCount();
-    std::vector<pr::PlateInfo> res = prc.RunPiplineAsImage(image,pr::SEGMENTATION_FREE_METHOD);
+    int totalRects = 0;
+    int totalLicences = 0;
+    float totalDetTime = 0.f;
+    float totalRcgTime = 0.f;
+
+    std::vector<pr::PlateInfo> res = prc.RunPiplineAsImage(image,pr::SEGMENTATION_FREE_METHOD,
+                                                          1.0, 1.0, 1.1, 3, 0.4, "", "", "",
+                                                          imageName.at(i), 
+                                                          &totalRects, &totalLicences,
+                                                          &totalDetTime, &totalRcgTime);
+
     double DetectionTime = ((double)getTickCount() - timeStart) / getTickFrequency()*1000;
     std::cout<<"Total time: "<<DetectionTime<<" Ms"<<std::endl;
     for(auto st:res) {
@@ -298,8 +328,16 @@ void TEST_CAM()
 //        cv::resize(frame,frame,cv::Size(frame.cols/2,frame.rows/2));
 
 
+        int totalRects = 0;
+        int totalLicences = 0;
+        float totalDetTime = 0.f;
+        float totalRcgTime = 0.f;
 
-        std::vector<pr::PlateInfo> res = prc.RunPiplineAsImage(frame,pr::SEGMENTATION_FREE_METHOD);
+        std::vector<pr::PlateInfo> res = prc.RunPiplineAsImage(image,pr::SEGMENTATION_FREE_METHOD,
+                                                          1.0, 1.0, 1.1, 3, 0.4, "", "", "",
+                                                          "", 
+                                                          &totalRects, &totalLicences,
+                                                          &totalDetTime, &totalRcgTime);
 
         for(auto st:res) {
             if(st.confidence>0.75) {

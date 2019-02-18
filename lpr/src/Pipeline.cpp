@@ -32,31 +32,40 @@ namespace pr {
         delete generalRecognizer;
         delete segmentationFreeRecognizer;
 
-
     }
 
-    std::vector<PlateInfo> PipelinePR:: RunPiplineAsImage(cv::Mat plateImage,int method) {
+    std::vector<PlateInfo> PipelinePR:: RunPiplineAsImage(cv::Mat plateImage, int method,
+                                                          float scalew, float scaleh,
+                                                          float scalefactor, minNeighbors,
+                                                          float recog_conf,
+                                                          std::string rst_det_path,
+                                                          std::string rst_seg_path,
+                                                          std::string rst_rcg_path,
+                                                          std::string imageName,
+                                                          int& totalRects, int& totalLicences,
+                                                          float& totalDetTime, float& totalRcgTime
+                                                          ) {
         std::vector<PlateInfo> results;
-        std::vector<pr::PlateInfo> plates;
+        std::vector<PlateInfo> plates;
+
         double timeStart = (double)getTickCount();
+
+        int x = int(float(plateImage.cols) * (1.0 - scalew));
+        int y = int(float(plateImage.rows) * (1.0 - scaleh));
+
         plateDetection->plateDetectionRough(plateImage,plates,36,700,
                                             cv::Point(x,y), 
                                             cv::Size2f(scalew, scaleh), 
                                             scale, minNeighbors);
 
         double DetectionTime = ((double)getTickCount() - timeStart) / getTickFrequency()*1000;
-        std::cout<<"Detection time: "<<DetectionTime<<" Ms"<<std::endl;
         
         for (pr::PlateInfo plateinfo:plates) {
-
             cv::Mat image_finemapping = plateinfo.getPlateImage();
             image_finemapping = fineMapping->FineMappingVertical(image_finemapping);
             image_finemapping = pr::fastdeskew(image_finemapping, 5);
 
-
-
             //Segmentation-based
-
             if(method==SEGMENTATION_BASED_METHOD)
             {
                 image_finemapping = fineMapping->FineMappingHorizon(image_finemapping, 2, HorizontalPadding);
@@ -71,7 +80,7 @@ namespace pr {
                 plateinfo.decodePlateNormal(pr::CH_PLATE_CODE);
 
             }
-                //Segmentation-free
+            //Segmentation-free
             else if(method==SEGMENTATION_FREE_METHOD)
             {
                 image_finemapping = fineMapping->FineMappingHorizon(image_finemapping, 4, HorizontalPadding+3);
@@ -84,7 +93,30 @@ namespace pr {
             results.push_back(plateinfo);
         }
         double RecognitionTime = ((double)getTickCount() - timeStart) / getTickFrequency()*1000 - DetectionTime;
-        std::cout<<"Recognition time: "<<RecognitionTime<<" Ms"<<std::endl;
+        std::cout<<"Detection time: "<<DetectionTime<<" Ms, with " << plates.size() << " plates got. \t";
+        std::cout<<"Recognition time: "<<RecognitionTime<<" Ms, with " << results.size() << " licences got."<<std::endl;
+        for (pr::PlateInfo plateinfo:plates) {
+            cv::Rect region = plateinfo.getPlateRect();
+            cv::rectangle(plateImage,cv::Point(region.x,region.y),cv::Point(region.x+region.width,region.y+region.height),cv::Scalar(255,0,0),3);
+        }
+        cv::imwrite(rst_det_path+imageName,plateImage);
+        for(auto st:results) {
+            if(st.confidence>recog_conf) {
+                std::cout << st.getPlateName() << " " << st.confidence << std::endl;
+                cv::Rect region = st.getPlateRect();
+
+                cv::rectangle(plateImage,cv::Point(region.x,region.y),cv::Point(region.x+region.width,region.y+region.height),cv::Scalar(255,255,0),1);
+                cv::putText(plateImage, st.getPlateName(), cv::Point(region.x,region.y), font_face, font_scale, cv::Scalar(0, 255, 255), thickness, 8, 0);
+
+            }
+        }
+        cv::imwrite(rst_rcg_path+imageName,plateImage);
+
+        totalRects += plates.size();
+        totalLicences += results.size();
+        totalDetTime += DetectionTime;
+        totalRcgTime += RecognitionTime;
+
         return results;
 
     }//namespace pr

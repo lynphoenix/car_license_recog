@@ -45,16 +45,17 @@ namespace pr{
 
 
             std::vector<std::string> plateRes;
-            std::vector<PlateInfo> RunPiplineAsImage(cv::Mat plateImage,int method);
-
-
-
-
-
-
-
+            std::vector<PlateInfo> RunPiplineAsImage(cv::Mat plateImage, int method,
+                                                          float scalew, float scaleh,
+                                                          float scalefactor, minNeighbors,
+                                                          float recog_conf,
+                                                          std::string rst_det_path,
+                                                          std::string rst_seg_path,
+                                                          std::string rst_rcg_path,
+                                                          std::string imageName,
+                                                          int& totalRects, int& totalLicences,
+                                                          float& totalDetTime, float& totalRcgTime
     };
-
 
 }
 #endif //SWIFTPR_PIPLINE_H
